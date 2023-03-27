@@ -1,0 +1,106 @@
+import { createSlice } from '@reduxjs/toolkit';
+import {
+  fetchContacts,
+  addContact,
+  delContact,
+  toggleCompleted,
+} from './operations';
+
+const handlePending = state => {
+  state.isLoading = true;
+};
+
+const handleRejected = (state, action) => {
+  state.isLoading = false;
+  state.error = action.payload;
+};
+
+export const contactsSlice = createSlice({
+  name: 'contacts',
+  initialState: {
+    items: [],
+    isLoading: false,
+    error: null,
+    filter: '',
+  },
+
+  extraReducers: {
+    [fetchContacts.pending]: handlePending,
+    [fetchContacts.fulfilled](state, action) {
+      state.isLoading = false;
+      state.error = null;
+      state.items = action.payload;
+    },
+    [fetchContacts.rejected]: handleRejected,
+    [addContact.pending]: handlePending,
+    [addContact.fulfilled](state, action) {
+      console.log('add', state, action);
+      state.isLoading = false;
+      state.error = null;
+      state.items.push(action.payload);
+    },
+
+    [addContact.rejected]: handleRejected,
+    [delContact.pending]: handlePending,
+    [delContact.fulfilled](state, action) {
+      state.isLoading = false;
+      state.error = null;
+      const index = state.items.findIndex(
+        contact => contact.id === action.payload.id
+      );
+      state.items.splice(index, 1);
+    },
+    [delContact.rejected]: handleRejected,
+    [toggleCompleted.pending]: handlePending,
+    [toggleCompleted.fulfilled](state, action) {
+      state.isLoading = false;
+      state.error = null;
+      const index = state.items.findIndex(
+        contact => contact.id === action.payload.id
+      );
+      state.items.splice(index, 1, action.payload);
+    },
+    [toggleCompleted.rejected]: handleRejected,
+  },
+});
+
+export const contactsReducer = contactsSlice.reducer;
+
+// import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+
+// export const contactsApi = createApi({
+//   reducerPath: 'contacts',
+//   baseQuery: fetchBaseQuery({
+//     baseUrl: 'https://641227a2f9fe8122ae1e4bb2.mockapi.io/',
+//   }),
+//   tagTypes: ['contacts'],
+//   endpoints: builder => ({
+//     getContacts: builder.query({
+//       query: () => `/contacts`,
+//       providesTags: ['contacts'],
+//     }),
+
+//     deleteContact: builder.mutation({
+//       query: id => ({
+//         url: `/contacts/${id}`,
+//         method: 'DELETE',
+//       }),
+//       invalidatesTags: ['contacts'],
+//     }),
+
+//     addContact: builder.mutation({
+//       query: values => ({
+//         url: `/contacts`,
+//         method: 'POST',
+//         body: values,
+//       }),
+//       invalidatesTags: ['contacts'],
+//     }),
+//   }),
+// });
+
+// export const {
+//   useGetContactsQuery,
+//   useDeleteContactMutation,
+//   useAddContactMutation,
+// } = contactsApi;
